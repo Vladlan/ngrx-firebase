@@ -4,14 +4,19 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { map } from 'rxjs/operators';
 import 'firebase/firestore';
-const collectionName = 'availableExercises';
+enum COLLECTIONS {
+  availableExercises = 'availableExercises',
+  finisedExcercises = 'finisedExcercises',
+}
 
 @Injectable()
 export class TrainingService {
   exerciseChanged = new Subject<Exercise>();
   exercisesChanged = new Subject<Exercise[]>();
+  finishedExercisesChanged = new Subject<Exercise[]>();
   private availableExercises: Exercise[] = [];
   private runningExercise: Exercise;
+  private finishedExercises: Exercise[];
   private exercises: Exercise[] = [];
 
   constructor(private firestore: AngularFirestore) { }
@@ -21,8 +26,9 @@ export class TrainingService {
   }
 
   fetchAvailableExercises() {
+    console.log('COLLECTIONS: ', COLLECTIONS);
     return this.firestore
-      .collection(collectionName)
+      .collection(COLLECTIONS.availableExercises)
       .snapshotChanges()
       .pipe(map(docArray => {
         return docArray.map(doc => {
@@ -47,7 +53,7 @@ export class TrainingService {
   }
 
   completeExercise() {
-    this.exercises.push({
+    this.addDataToDB({
       ...this.runningExercise,
       date: new Date(),
       state: 'completed'
@@ -57,7 +63,7 @@ export class TrainingService {
   }
 
   cancelExercise(progress: number) {
-    this.exercises.push({
+    this.addDataToDB({
       ...this.runningExercise,
       duration: this.runningExercise.duration * (progress / 100),
       calories: this.runningExercise.calories * (progress / 100),
@@ -72,7 +78,18 @@ export class TrainingService {
     return { ...this.runningExercise };
   }
 
-  getCompletedOrCancelledExercises() {
-    return this.exercises.slice();
+  fetchCompletedOrCancelledExercises() {
+    this.firestore
+    .collection(COLLECTIONS.finisedExcercises)
+    .valueChanges()
+    .subscribe((exercises: Exercise[]) => {
+      this.finishedExercisesChanged.next(exercises);
+    });
+  }
+
+  private addDataToDB(exercise: Exercise) {
+    this.firestore
+    .collection(COLLECTIONS.finisedExcercises)
+    .add(exercise);
   }
 }
