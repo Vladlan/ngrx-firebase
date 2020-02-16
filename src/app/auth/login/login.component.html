@@ -27,7 +27,7 @@
       <mat-error>Missing password.</mat-error>
     </mat-form-field>
     <button
-      *ngIf="!isLoading"
+      *ngIf="!(isLoading$ | async)"
       type="submit"
       mat-raised-button
       color="primary"
@@ -35,14 +35,6 @@
     >
       Submit
     </button>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <mat-spinner *ngIf="isLoading$ | async"></mat-spinner>
   </form>
 </section>
-
-<!-- <ol>
-  <li>Add an email and password field (with Material Components of course)</li>
-  <li>Add validation (email => required and email, password => required)</li>
-  <li>Show errors and hints</li>
-  <li>Make form submittable and disable button if invalid</li>
-  <li>BONUS: Do all of that by using the reactive approach!</li>
-</ol> -->
