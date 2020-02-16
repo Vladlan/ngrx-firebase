@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { map } from 'rxjs/operators';
 import 'firebase/firestore';
+import { UIService } from '../shared/ui.service';
 enum COLLECTIONS {
   availableExercises = 'availableExercises',
   finisedExcercises = 'finisedExcercises',
@@ -18,13 +19,14 @@ export class TrainingService {
   private runningExercise: Exercise;
   private fbSubs: Subscription[] = [];
 
-  constructor(private firestore: AngularFirestore) { }
+  constructor(private firestore: AngularFirestore, private uiService: UIService) { }
 
   getAvailableExercises() {
     return this.availableExercises.slice();
   }
 
   fetchAvailableExercises() {
+    this.uiService.loadingStateChanged.next(true);
     const fetchAvailableExercisesSub = this.firestore
       .collection(COLLECTIONS.availableExercises)
       .snapshotChanges()
@@ -38,9 +40,14 @@ export class TrainingService {
         });
       }))
       .subscribe(((exercises: Exercise[]) => {
+        this.uiService.loadingStateChanged.next(false);
         this.availableExercises = exercises;
         this.exercisesChanged.next([...this.availableExercises]);
-      }));
+      }), error => {
+        this.uiService.loadingStateChanged.next(false);
+        this.uiService.showSnackbar('Fetching Exercises failed, please try again later', null, 3000);
+        this.exercisesChanged.next(null);
+      });
     this.fbSubs.push(fetchAvailableExercisesSub);
   }
 
