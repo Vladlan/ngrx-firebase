@@ -46,6 +46,9 @@ export class TrainingService {
   }
 
   startExercise(selectedId: string) {
+    this.firestore
+    .doc(`${COLLECTIONS.availableExercises}/${selectedId}`)
+    .update({lastSelected: new Date()});
     this.runningExercise = this.availableExercises.find(
       ex => ex.id === selectedId
     );
