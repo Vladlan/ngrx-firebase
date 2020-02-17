@@ -5,7 +5,6 @@ import { AuthService } from '../auth.service';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import * as fromRoot from '../../app.reducer';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',

@@ -3,7 +3,6 @@ import {
   CanActivate,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
-  Router,
   Route,
   CanLoad
 } from '@angular/router';
@@ -15,7 +14,6 @@ import { take } from 'rxjs/operators';
 @Injectable()
 export class AuthGuard implements CanActivate, CanLoad {
   constructor(
-    private router: Router,
     private store: Store<fromRoot.State>,
   ) { }
 
